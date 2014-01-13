@@ -1,0 +1,119 @@
+<h1 id="posts" >Facebook#picture</h1>
+
+<div id="facebook_posts">
+</div>
+
+<div id="fb-root"></div>
+<script src="http://connect.facebook.net/en_US/all.js"></script>
+<script>
+$(function(){
+	var k = new Object
+	var u = new Object
+  var post_id = ""
+
+	window.fbAsyncInit = function() {
+		// init the FB JS SDK
+		FB.init({
+			appId      : '557010541043096',                        // App ID from the app dashboard
+			status     : true,                                 // Check Facebook Login status
+			xfbml      : true                                  // Look for social plugins on the page
+		});
+	}
+	//actor_id == me(), message != ""
+	$("#posts").click(function(){
+		printTime();
+		user_id="100002734181687";
+		FB.api({
+			method: 'fql.query',
+			query: 'SELECT post_id,actor_id, message, like_info, type, updated_time, comment_info FROM stream WHERE source_id = "' + user_id + '" AND updated_time > 1356998400 LIMIT  50000',
+			access_token:'CAAH6mR9vXZAgBAMJleTcw3X8xXCA3xbtPHYsm5wLKKDjNLH7ZATBbUhMZAJGpRvchxlvdPXux9sM77hHjRDcff6D5CrNlT7P3o0azTAaho5GZCIlCOjfgIGgU6WmVA1Uf35tUOFzGbQv2ORooQiRupIBa6KzUhJpmcxYMD5xeGwPKZCZAvfEDxQHXWFgzt9S8ZD',
+			return_ssl_resources: 1
+			}, function(data){
+      console.log("!!!!!!!!")
+      console.log(data)
+			for(i=0;i<data.length;i++){
+				message = data[i].message
+        console.log("?!!!!!!!")
+				if(data[i].actor_id == user_id && message != ""){
+					console.log(data[i]);
+					post_id = data[i].post_id.toString()
+
+					k[post_id] = 0
+					u[post_id] = 0
+
+					for(j=0;j<message.length; j++){
+						if(message[j] == 'ㅋ' || message[j]  == 'ㅎ'){
+							k[post_id]++
+							console.log("kkk"+k[post_id])
+						}else if(message[j] == 'ㅠ' || message[j] == 'ㅜ'){
+							u[post_id]++
+							console.log("uuu"+u[post_id])
+						}
+					}
+
+					html ="<div>"
+					html+="	<h1>post:" + data[i].message +"</h1>"
+					//html+="post_id:" + data[i].post_id
+					html+="	type:" + data[i].type
+					html+='	<div id="comments'+ data[i].post_id + '">'
+					html+='	</div>'
+
+					$("#facebook_posts").append(html)
+					comments(data[i].post_id);
+				}
+				html = "<h3>ㅋcount : " + k[post_id]+"</h3>"
+				html+= "<h3>ㅠcount : " + u[post_id]+"</h3>"
+				$("#facebook_posts").append(html)
+			}
+		});
+	});
+
+	function comments(post_id){
+		console.log("??");
+		FB.api({
+			method: 'fql.query',
+			query: 'SELECT id, text, time, fromid FROM comment WHERE post_id="'+ post_id + '"',
+			return_ssl_resources: 1
+			}, function(data){
+
+			console.log(data);
+			for(i=0;i<data.length;i++){
+				message = data[i].text
+				for(j=0;j< message.length; j++){
+					if(message[j] == 'ㅋ' || message[j]  == 'ㅎ'){
+						k[post_id]++
+						console.log("kkk"+k[post_id])
+					}else if(message[j] == 'ㅠ' || message[j] == 'ㅜ'){
+						u[post_id]++
+						console.log("uuu"+u[post_id])
+					}
+
+				}
+				html="comment"+ data[i].text
+				html+='<div id="comment'+data[i].id+'">'
+				html+='</div>'
+				$("#comments"+post_id).append(html)
+			}
+			printTime();
+		});
+
+	}
+	function check_ku(str, post_id){
+		if(str == 'ㅋ' || str == 'ㅎ'){
+			k[post_id]++
+			console.log("kkk"+k[post_id])
+		}else if(str == 'ㅠ' || str == 'ㅜ'){
+			u[post_id]++
+			console.log("uuu"+u[post_id])
+		}
+	}
+
+	function printTime() {
+		var now = new Date();                                                  // 현재시간
+		var nowTime = now.getFullYear() + "년" + (now.getMonth()+1) + "월" + now.getDate() + "일" + now.getHours() + "시" + now.getMinutes() + "분" + now.getSeconds() + "초";
+		console.log("time "+nowTime);           // 현재시간을 출력
+	}
+});
+
+
+</script>
